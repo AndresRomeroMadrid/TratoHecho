@@ -162,26 +162,34 @@
                     </div>
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Largo del terreno
-                                (m)</label>
+                            <label for="calc-largo" class="text-sm font-bold text-slate-700 dark:text-slate-300">Largo del terreno (m)</label>
                             <div class="relative">
                                 <input
-                                    class="w-full rounded-xl border-primary/10 bg-background-light p-4 pr-12 focus:border-primary focus:ring-primary dark:bg-background-dark"
-                                    placeholder="Ej: 10.5" type="number" />
-                                <span
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">m</span>
+                                    id="calc-largo"
+                                    class="w-full rounded-xl border border-primary/10 bg-background-light p-4 pr-12 focus:border-primary focus:ring-primary dark:bg-background-dark transition-colors"
+                                    placeholder="Ej: 10.5"
+                                    type="text"
+                                    inputmode="decimal"
+                                    maxlength="5"
+                                    autocomplete="off" />
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">m</span>
                             </div>
+                            <p id="error-largo" class="hidden text-xs text-red-500 mt-1">Ingresa un número válido (máx. 3 dígitos, decimales con punto o coma)</p>
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Ancho del terreno
-                                (m)</label>
+                            <label for="calc-ancho" class="text-sm font-bold text-slate-700 dark:text-slate-300">Ancho del terreno (m)</label>
                             <div class="relative">
                                 <input
-                                    class="w-full rounded-xl border-primary/10 bg-background-light p-4 pr-12 focus:border-primary focus:ring-primary dark:bg-background-dark"
-                                    placeholder="Ej: 5.0" type="number" />
-                                <span
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">m</span>
+                                    id="calc-ancho"
+                                    class="w-full rounded-xl border border-primary/10 bg-background-light p-4 pr-12 focus:border-primary focus:ring-primary dark:bg-background-dark transition-colors"
+                                    placeholder="Ej: 5.0"
+                                    type="text"
+                                    inputmode="decimal"
+                                    maxlength="5"
+                                    autocomplete="off" />
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">m</span>
                             </div>
+                            <p id="error-ancho" class="hidden text-xs text-red-500 mt-1">Ingresa un número válido (máx. 3 dígitos, decimales con punto o coma)</p>
                         </div>
                         <div class="md:col-span-2 space-y-2">
                             <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Tipo de Proyecto</label>
@@ -224,10 +232,9 @@
                         <div class="flex items-center justify-between border-b border-white/10 pb-4">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-white/70">layers</span>
-                                <span class="text-sm font-medium">Rollos de Césped</span>
+                                <span class="text-sm font-medium">Área de Césped</span>
                             </div>
-                            <span class="text-xl font-black">52.5 <span
-                                    class="text-xs font-normal opacity-70">m²</span></span>
+                            <span id="result-m2" class="text-xl font-black transition-all duration-300">— <span class="text-xs font-normal opacity-70">m²</span></span>
                         </div>
                         <div class="flex items-center justify-between border-b border-white/10 pb-4">
                             <div class="flex items-center gap-3">
@@ -439,6 +446,85 @@
             </div>
         </button>
     </div>
+
+    <!-- Calculadora Logic -->
+    <script>
+        (function () {
+            const inputLargo = document.getElementById('calc-largo');
+            const inputAncho = document.getElementById('calc-ancho');
+            const errorLargo = document.getElementById('error-largo');
+            const errorAncho = document.getElementById('error-ancho');
+            const resultSpan = document.getElementById('result-m2');
+
+            // Regex: up to 3 integer digits, optional comma or dot followed by 1-2 decimal digits
+            const VALID_PATTERN = /^\d{1,3}([.,]\d{1,2})?$/;
+
+            function parseVal(str) {
+                // Replace comma with dot for parseFloat
+                return parseFloat(str.replace(',', '.'));
+            }
+
+            function validateInput(input, errorEl) {
+                const raw = input.value.trim();
+                if (raw === '') {
+                    errorEl.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                    input.classList.add('border-primary/10');
+                    return null;  // empty => not ready yet
+                }
+
+                if (!VALID_PATTERN.test(raw) || parseVal(raw) <= 0) {
+                    errorEl.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-primary/10');
+                    return false; // invalid
+                }
+
+                errorEl.classList.add('hidden');
+                input.classList.remove('border-red-500');
+                input.classList.add('border-primary/10');
+                return parseVal(raw); // valid number
+            }
+
+            function recalculate() {
+                const largo = validateInput(inputLargo, errorLargo);
+                const ancho = validateInput(inputAncho, errorAncho);
+
+                if (largo && ancho) {
+                    // Both valid and non-empty: compute m²
+                    const area = (largo * ancho).toFixed(2);
+                    resultSpan.innerHTML = `${area} <span class="text-xs font-normal opacity-70">m²</span>`;
+                    // Animate result
+                    resultSpan.classList.add('scale-110');
+                    setTimeout(() => resultSpan.classList.remove('scale-110'), 200);
+                } else if (largo === false || ancho === false) {
+                    resultSpan.innerHTML = `— <span class="text-xs font-normal opacity-70">m²</span>`;
+                } else {
+                    // Still waiting for input
+                    resultSpan.innerHTML = `— <span class="text-xs font-normal opacity-70">m²</span>`;
+                }
+            }
+
+            // Block invalid key presses (allow digits, comma, dot, backspace, arrows, tab, delete)
+            function filterKey(e) {
+                const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+                if (allowed.includes(e.key)) return;
+                if (!/[\d.,]/.test(e.key)) {
+                    e.preventDefault();
+                    return;
+                }
+                // Allow only one separator (comma or dot)
+                if ((e.key === ',' || e.key === '.') && /[.,]/.test(e.target.value)) {
+                    e.preventDefault();
+                }
+            }
+
+            inputLargo.addEventListener('keydown', filterKey);
+            inputAncho.addEventListener('keydown', filterKey);
+            inputLargo.addEventListener('input', recalculate);
+            inputAncho.addEventListener('input', recalculate);
+        })();
+    </script>
 
     <script src="chatbot.js"></script>
 </body>

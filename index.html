@@ -86,6 +86,8 @@
                         <a class="text-sm font-semibold hover:text-primary transition-colors"
                             href="insumos.html">Insumos y Materiales</a>
                         <a class="text-sm font-semibold hover:text-primary transition-colors"
+                            href="documento.html">Buscar Documento</a>
+                        <a class="text-sm font-semibold hover:text-primary transition-colors"
                             href="contacto.html">Contacto</a>
                         <a class="bg-primary/10 text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary hover:text-white transition-colors"
                             href="calculadora.html">Calculadora</a>
@@ -125,12 +127,48 @@
                         <span
                             class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold">3</span>
                     </button>
-                    <button class="lg:hidden p-2">
-                        <span class="material-symbols-outlined">menu</span>
+                    <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Abrir menú">
+                        <span id="mobile-menu-icon" class="material-symbols-outlined">menu</span>
                     </button>
                 </div>
             </div>
         </header>
+
+        <!-- Menú Móvil Desplegable -->
+        <div id="mobile-menu"
+            class="lg:hidden hidden sticky top-[73px] z-40 w-full bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-primary/10 shadow-lg">
+            <nav class="flex flex-col px-6 py-4 gap-1">
+                <a href="index.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">home</span> Inicio
+                </a>
+                <a href="pasto-deportivo.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">sports_soccer</span> Pasto Deportivo
+                </a>
+                <a href="jardines.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">yard</span> Jardines
+                </a>
+                <a href="insumos.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">inventory_2</span> Insumos y Materiales
+                </a>
+                <a href="documento.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">search</span> Buscar Documento
+                </a>
+                <a href="contacto.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">mail</span> Contacto
+                </a>
+                <a href="calculadora.html"
+                    class="mt-2 flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition-colors">
+                    <span class="material-symbols-outlined text-base">calculate</span> Calculadora
+                </a>
+            </nav>
+        </div>
+
         <div class="px-6 mt-8 w-full">
             <div class="mx-auto max-w-7xl">
                 <!-- Hero Section -->
@@ -552,6 +590,22 @@
         </button>
     </div>
 
+    <!-- Script Menú Móvil -->
+    <script>
+        (function () {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            if (btn && menu) {
+                btn.addEventListener('click', () => {
+                    const isOpen = !menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', isOpen);
+                    icon.textContent = isOpen ? 'menu' : 'close';
+                });
+            }
+        })();
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const chatbotButton = document.getElementById('chatbot-button');
@@ -658,13 +712,15 @@
 
                 try {
                     // URL COMPLETA DE TU WEBHOOK (Cambia solo si reinicias ngrok)
-                    const response = await fetch('https://aromeroma.app.n8n.cloud/webhook/8ba2c0b4-bb98-4437-b34d-4da692c16ed7', {
+                    // CAMBIO: Ahora apuntamos a tu n8n LOCAL en lugar del Cloud
+                    const response = await fetch('http://localhost:5678/webhook-test/chat-don-queno', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({
-                            chatInput: message,
-                            sessionId: sessionId,
-                            action: "sendMessage"
+                            message: message, // El texto que viene del input
+                            sessionId: 'sesion-local-001' // ID para tu MongoDB
                         })
                     });
 
